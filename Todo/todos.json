@@ -1,0 +1,7 @@
+{
+    "items" : [
+        { "id" : 0, "text": "Go in the shop", "checked": "true" },
+        { "id" : 1, "text": "Do homework", "checked": "true" },
+        { "id" : 2, "text": "Help", "checked": "true" }
+    ]
+}
