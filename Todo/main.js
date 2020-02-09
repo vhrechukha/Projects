@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function(event) { 
+document.addEventListener("DOMContentLoaded", function() { 
     let newTodoinput = document.getElementById("new-todo");
     getItems();
 
@@ -15,7 +15,12 @@ document.addEventListener("DOMContentLoaded", function(event) {
         });
 
     document.body.onclick = function(event) {
-        t = event.target || event.innerText || textContent; 
+        let t = event.target || event.innerText || textContent; 
+
+        //make input be fulfilled
+        if (t.tagName === 'INPUT'){
+            fulfilledInput(t);
+        }
 
         //change item
         if (t.tagName === 'LABEL'){
@@ -27,8 +32,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
             deleteItem(t.id, t);
         }
    }
-
-
 });
 
 let getItems = () => {
@@ -111,3 +114,6 @@ let deleteItem = (id, button) => {
     xmlhttp.send("id=" + id);
 };
 
+let fulfilledInput = (input) => {
+    input.parentNode.parentNode.classList.toggle("completed");
+};
