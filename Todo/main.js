@@ -14,21 +14,33 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
 
-    document.body.onclick = function(event) {
+    document.onclick = function(event) {
         let t = event.target || event.innerText || textContent; 
 
         //make input be fulfilled
-        if (t.tagName === 'INPUT'){
+        if (t.tagName === 'INPUT') {
             fulfilledInput(t);
         }
 
         //change item
-        if (t.tagName === 'LABEL'){
-            changeItem(t.id, t.textContent, t);
+        if (t.tagName === 'LABEL') {
+            let inputState = t.parentNode.parentNode.lastElementChild;
+                labelState = t.parentNode;
+
+            let data = changeInStaticConditions();
+            saveChangedItem(data);
+
+            changeInVariableCondition(inputState, labelState, t.textContent);
+        }
+
+        // verufy if some item changed
+        if (t.tagName !== 'INPUT' && t.tagName !== 'LABEL') {
+            let data = changeInStaticConditions();
+            saveChangedItem(data);
         }
 
         //delete item
-        if (t.tagName === 'BUTTON'){
+        if (t.tagName === 'BUTTON') {
             deleteItem(t.id, t);
         }
    }
@@ -78,25 +90,57 @@ let addNewItem = (id, text) => {
                 <label>${text}</label>
                 <button class="destroy"></button>
             </div>
+            <input class="edit" style="display: none;">
         </li>`
     ;
 };
-    
-let changeItem = (id, text, t) => {
+
+let changeInStaticConditions = () => {
+    let inputElem = document.querySelectorAll('input.edit'),
+        divELem = document.querySelectorAll('div.view'),
+        data = [],
+        i;
+
+    for (i = 0; i < divELem.length; i++) { 
+        if(inputElem[i].value) {
+            data[0] = i;
+            data[1] = inputElem[i].value; 
+        }
+    }
+    return data;
+};
+
+let displaySaveChangedItem = (i) => {
+    let todoTask = document.querySelectorAll('div.view label')[i],
+        inputElem = document.querySelectorAll('input.edit'),
+        divELem = document.querySelectorAll('div.view');
+    inputElem[i].style = 'display: none';
+    divELem[i].style = 'display: block';
+    todoTask.innerText = inputElem[i].value;
+};
+
+let changeInVariableCondition = (inputState, labelState, textContent) => {
+    inputForm = inputState,
+    todoTask = labelState;
+    inputForm.innerHTML = todoTask.value; 
+    inputForm.style = 'display : block';
+    inputForm.value = textContent;
+    todoTask.style = "display: none";
+};
+
+let saveChangedItem = (data) => {
     let xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             let reply = JSON.parse(this.responseText);
             if(reply.ok === true){
-                deleteItem(id, t);
-                document.getElementById("new-todo").value = text;
+                displaySaveChangedItem(data[0]);
             }
         }
     };
-    xmlhttp.open("POST", "api/v1/deleteItem.php", true);
+    xmlhttp.open("POST", "api/v1/changeItem.php", true);
     xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    xmlhttp.send("id=" + id, "text=" + text, "checked=" + true);
-    
+    xmlhttp.send("id=" + data[0], "text=" + data[1], "checked=" + true);
 };
 
 let deleteItem = (id, button) => {
@@ -117,3 +161,4 @@ let deleteItem = (id, button) => {
 let fulfilledInput = (input) => {
     input.parentNode.parentNode.classList.toggle("completed");
 };
+
